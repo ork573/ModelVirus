@@ -30,14 +30,14 @@ public class Person extends Resident {
 	}
 
 	//Person constructed according to Control Panel settings
-	public Person(Control control) {
-		super(control);
+	public Person(Control ctl) {
+		super(ctl);
 		
-		toRoam = control.toRoam;			    
-		toDie = control.toDie;		
-		toBeInfected = control.toBeInfected;
-		sickTimeLow = control.sickTimeLow;
-		sickTimeMax = control.sickTimeMax;
+		toRoam = ctl.toRoam;			    
+		toDie = ctl.toDie;		
+		toBeInfected = ctl.toBeInfected;
+		sickTimeLow = ctl.sickTimeLow;
+		sickTimeMax = ctl.sickTimeMax;
 
 		this.init();
 	}
@@ -74,7 +74,7 @@ public class Person extends Resident {
 	// infected setter and update to infected counter
 	public void setInfected() {
 		state = virus.infected;
-		if (control != null) control.numInfected++;
+		if (ctl != null) ctl.numInfected++;
 	}
 	
 	//calculates health of person over time
@@ -84,28 +84,38 @@ public class Person extends Resident {
 		//infect people forever. 
 		if(state == virus.infected) {
 			//recoveryTime update
-			sickTime -= control.timerValue;
+			sickTime -= ctl.timerValue;
 			
 			//once the person has been given enough time, they will be considered recovered
 			if(sickTime<=0) {
 				if(Math.random() < toDie) {
 					state = virus.died;
-					if (control != null) control.numDied++;
+					if (ctl != null) ctl.numDied++;
 				} else {
 					state = virus.recovered;
 				}
-				if (control != null) control.numInfected--;
+				if (ctl != null) ctl.numInfected--;
 			}
 		}			
 	}
 	
+	/*
+	 * Check if collision between two person objects has occurred
+	*/
+	@Override
+	public void collisionDetector(Resident p2) {
+		super.collisionDetector(p2);
+	}
 	
 	/**
 	 * Collision between two person objects has been detected
 	 * If two Person objects collide they have a possibility of infecting!
 	 * @param p2
 	 */
-	public void collisionAction(Person p2) {
+	@Override
+	public void collisionAction(Resident r2) {
+	
+		Person p2 = (Person)r2;
 		//infection only happens if one person is infected and the other has never
 		//been infected before
 		if (this.isInfected() && p2.isCandidate()) {
@@ -113,14 +123,6 @@ public class Person extends Resident {
 		}else if(this.isCandidate() && p2.isInfected()) {
 			this.setInfected();
 		}				
-	}
-	
-	public void collisionActionWithVerticalObstacle() {
-		vx *= -1;
-	}
-	
-	public void collisionActionWithHorizontalObstacle() {
-		vy *= -1;
 	}
 	
 	/*

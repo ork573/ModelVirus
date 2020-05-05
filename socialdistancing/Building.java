@@ -1,58 +1,89 @@
 package socialdistancing;
-
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-/**
- * Building is logical container for Walls, it has Walls which are Entities in Simulation
- * @author johnmortensen
- *
- */
-public class Building {	
-	String name;
-	int vx, vy, hx, hy;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.Timer;
 
-	//Front facing walls of Building
-	Wall vWall;
-	Wall hWall;
+
+/* 
+	Building extends JPanel so that we can override the paint method. The paint method is necessary to use the simple
+	drawing tools of the library! 
+	Simulator implements an ActionListener which adds the method actionPerformed. This method is invoked by the 
+	animation timer every timerValue(16ms).
+*/
+public class Building extends JPanel implements ActionListener{
+	// serial suppresses warning
+	private static final long serialVersionUID = 1L;
 	
-	/**
-	 * Building has a name, vertical and horizontal coordinates
-	 * @param name
-	 * @param vx - vertical x
-	 * @param vy - vertical y
-	 * @param hx - horizontal x
-	 * @param hy - horizontal y
-	 */
-    public Building(String name, int vx, int vy, int hx, int hy) {
-    	this.name = name;
-    	this.vx = vx;
-    	this.vy = vy;
-    	this.hx = hx;
-    	this.hy = hy;
-    	
-    	vWall = new Wall(vx, vy, "SocialDistancingImages/wall2.png", true);
-    	hWall = new Wall(hx, hy, "SocialDistancingImages/wall1.png", false);   	
-    }
-    
-    public String getName() {
-    	return name;
-    }
-    
-    public Wall getVWall() {
-    	return vWall;
-    }
-    
-    public Wall getHWall() {
-    	return hWall;
-    }
-     
-    public void drawImage(Graphics g, Panel panel) {
-    	//xoffset is to orient walls
-    	int xoffset = vx < hx ? vx : hx;
-		g.drawString(name, xoffset + 30 , vy + 50);
-    	g.drawImage(vWall.getImage(), vWall.getX(), vWall.getY(), panel);
-    	g.drawImage(hWall.getImage(), hWall.getX(), hWall.getY(), panel);
-    }
+	//simulation control objects/values
+	JFrame frame;
+	Control control; //
+	Timer timer; //Event control	
+	int time = 0; //Track time as the simulation runs
+	
+	/* constructor will setup our main Graphic User Interface - a simple Frame! */
+	public Building(Control ctl, String title) {
+		// used for Control callback
+		this.control = ctl;
+		
+		//Setup the GUI
+		frame = new JFrame(title);
+		frame.setSize(ctl.frameX,ctl.frameY); //set the size
+		
+		//add this so that hitting the x button will actually end the program
+		//the program will continue to run behind the scenes and you might end up with 10+ of them
+		//without realizing it
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		//make it visible
+		frame.setVisible(true);
+		frame.add(this); //add this class (JPanel) to the JFrame
+	}
+	
+	//activation of Simulator separated from Constructor 
+	public void activate() {
+		//Timer for animation
+		//Argument 1: timerValue is a period in milliseconds to fire event
+		//Argument 2:t any class that "implements ActionListener"
+		timer = new Timer(control.timerValue, this); //timer constructor
+		timer.restart(); //restart or start
+		
+		// frame becomes visible
+		frame.setVisible(true);		
+	}
+	
+	/* This invoked by Timer per period in milliseconds in timerValue  */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		//Triggers paint call through polymorphism
+		repaint();	
+	}
 
+	/* paint method for drawing the simulation and animation */
+	@Override
+	public void paint(Graphics g) {
+		
+		//tracking total time manually with the time variable
+		time += control.timerValue;
+		
+		//events
+		super.paintComponent(g); // a necessary call to the parent paint method, required for proper screen refreshing
+		control.sprouts.paintWalls(g);
+		control.scripps.paintWalls(g);
+		control.bab.paintWalls(g);
+		control.m.paintWalls(g);
+		//control.paintWalls(g);
+		control.paintPersons(g); // repaint all objects in simulation
+		
+	} 
+		
+	
 }

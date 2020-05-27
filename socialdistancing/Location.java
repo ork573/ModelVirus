@@ -31,8 +31,8 @@ public class Location
          this.n = n;
          this.m = m;
          this.name = name;
-         ab = new Wall(a, b, "SocialDistancingImages/wall2.png", true);
-         xy = new Wall(x, y, "SocialDistancingImages/wall1.png", false);
+         ab = new Wall(a, b, true);
+         xy = new Wall(x, y, false);
     }
     public void paintWalls(Graphics g){
         g.drawImage(ab.getImage(), ab.getX(), ab.getY(), view);

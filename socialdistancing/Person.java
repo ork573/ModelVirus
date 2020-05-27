@@ -1,7 +1,7 @@
 package socialdistancing;
 
 import java.util.ArrayList;
-
+import java.awt.Rectangle;
 // A person contains properties of Health
 public class Person extends Resident {
 	
@@ -99,6 +99,21 @@ public class Person extends Resident {
 		}			
 	}
 	
+	public void personToWallCollision(Wall[] wallArr, ArrayList<Rectangle> r) {
+            
+            Rectangle personRect = new Rectangle(this.x,this.y, this.width, this.height);
+            for(int i = 0; i < wallArr.length;i++)
+            {
+                if(r.get(i).intersects(personRect))
+                    if(wallArr[i].vertical)
+                    {
+                        this.vx *= -1;
+                    }
+                    else
+                        this.vy *= -1;
+            }
+        }
+        
 	/*
 	 * Check if collision between two person objects has occurred
 	*/
